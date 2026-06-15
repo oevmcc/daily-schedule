@@ -5,8 +5,8 @@
     { "id": "breakfast", "time": "07:30", "dur": 30, "title": "Breakfast", "sub": "Protein + fruit", "cat": "health", "icon": "ti-egg" },
     { "id": "lunch", "time": "12:30", "dur": 45, "title": "Lunch", "sub": "Something real", "cat": "health", "icon": "ti-salad" },
     { "id": "dinner", "time": "18:30", "dur": 45, "title": "Dinner", "sub": "Healthy + unwind", "cat": "health", "icon": "ti-tools-kitchen-2" },
-    { "id": "winddown", "time": "21:30", "dur": 60, "title": "Wind down — screens off", "sub": "Dim lights, prep for sleep", "cat": "health", "icon": "ti-moon" },
-    { "id": "sleep", "time": "22:30", "dur": 60, "title": "Sleep", "sub": "Aim for 8 hours", "cat": "rest", "icon": "ti-bed" }
+    { "id": "winddown", "time": "21:00", "dur": 60, "title": "Wind down — screens off", "sub": "Dim lights, prep for sleep", "cat": "health", "icon": "ti-moon" },
+    { "id": "sleep", "time": "22:00", "dur": 60, "title": "Bedtime", "sub": "Lights out · fixed at 10pm", "cat": "rest", "icon": "ti-bed", "fixed": true }
   ],
   "weekly": {},
   "appointments": {
