@@ -9,5 +9,15 @@
     { "id": "sleep", "time": "22:30", "dur": 60, "title": "Sleep", "sub": "Aim for 8 hours", "cat": "rest", "icon": "ti-bed" }
   ],
   "weekly": {},
-  "appointments": {}
+  "appointments": {
+    "2026-06-15": [
+      { "id": "gym-0615", "time": "08:00", "dur": 60, "title": "Gym workout", "sub": "Done", "cat": "health", "icon": "ti-barbell", "fixed": false },
+      { "id": "drive1-0615", "time": "09:50", "dur": 30, "title": "Drive Mesquite → Dallas", "sub": "Grace Ln → Rockbrook Dr · ~30 min", "cat": "logi", "icon": "ti-car", "fixed": false },
+      { "id": "dropemma-0615", "time": "10:20", "dur": 15, "title": "Drop off Emma", "sub": "Rockbrook Dr", "cat": "logi", "icon": "ti-user-heart", "fixed": false },
+      { "id": "bank-0615", "time": "10:35", "dur": 60, "title": "Bank — open Nova Lobo account", "sub": "Bring EIN + ID", "cat": "logi", "icon": "ti-building-bank", "fixed": false },
+      { "id": "storage-0615", "time": "11:35", "dur": 45, "title": "Storage units for Aunt Mary", "sub": "Compare size + price", "cat": "logi", "icon": "ti-building-warehouse", "fixed": false },
+      { "id": "driveback-0615", "time": "12:20", "dur": 30, "title": "Drive Dallas → Mesquite", "sub": "Rockbrook Dr → Grace Ln · ~30 min", "cat": "logi", "icon": "ti-car", "fixed": false },
+      { "id": "playerstv-0615", "time": "13:00", "dur": 270, "title": "Players TV site for Pete", "sub": "Deep work · most of the afternoon", "cat": "work", "icon": "ti-device-tv", "fixed": false }
+    ]
+  }
 }
