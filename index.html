@@ -57,9 +57,30 @@
     margin-left:auto;padding:3px 8px;border-radius:999px;background:currentColor;flex:none}
   .nowtag b{color:var(--card)}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+  body.locked .wrap{display:none}
+  #gate{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+  body.locked #gate{display:flex}
+  .gatebox{width:100%;max-width:320px;text-align:center}
+  .gatebox i{font-size:34px;color:var(--health)}
+  .gatebox h2{font-size:20px;font-weight:600;margin:14px 0 4px}
+  .gatebox p{font-size:13.5px;color:var(--muted);margin:0 0 18px}
+  #pw{width:100%;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);text-align:center}
+  #pw:focus{outline:none;border-color:var(--health)}
+  #go{width:100%;margin-top:10px;font-size:16px;font-weight:600;padding:12px;border:none;border-radius:12px;background:var(--health);color:#fff;cursor:pointer}
+  #err{color:#c0392b;font-size:13px;min-height:18px;margin-top:10px}
 </style>
 </head>
-<body>
+<body class="locked">
+<div id="gate">
+  <div class="gatebox">
+    <i class="ti ti-lock"></i>
+    <h2>My Day</h2>
+    <p>Enter the password to view your schedule</p>
+    <input id="pw" type="password" inputmode="text" autocomplete="off" placeholder="Password" />
+    <button id="go">Unlock</button>
+    <div id="err"></div>
+  </div>
+</div>
 <div class="wrap">
   <header>
     <p class="eyebrow">Your day</p>
@@ -99,6 +120,32 @@
   <footer>Built for you · tap &amp; hold the share button to “Add to Home Screen”</footer>
 </div>
 
+<script>
+  var PW_HASH="7f912abfefacfcb55ed0a87dd25f2c471d52d9eeb9c08983b52585472e9319b4";
+  var KEY="myday_unlocked_v1";
+  function unlock(){document.body.classList.remove("locked");if(window.refresh)window.refresh();}
+  async function sha256(s){
+    var buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+  }
+  async function tryUnlock(){
+    var pw=document.getElementById("pw").value;
+    var err=document.getElementById("err");
+    if(await sha256(pw)===PW_HASH){
+      try{localStorage.setItem(KEY,"1");}catch(e){}
+      unlock();
+    } else { err.textContent="Wrong password — try again."; document.getElementById("pw").value=""; }
+  }
+  (function(){
+    var remembered=false; try{remembered=localStorage.getItem(KEY)==="1";}catch(e){}
+    if(remembered){unlock();}
+    else{
+      document.getElementById("go").addEventListener("click",tryUnlock);
+      document.getElementById("pw").addEventListener("keydown",function(e){if(e.key==="Enter")tryUnlock();});
+      document.getElementById("pw").focus();
+    }
+  })();
+</script>
 <script>
   function mins(s){var p=s.split(":");return (+p[0])*60+(+p[1]);}
   function refresh(){
