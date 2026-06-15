@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="My Day" />
 <title>My Day — Monday, June 15</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css" />
+<link rel="manifest" href="manifest.json" />
 <style>
   :root{
     --bg:#f5f4ef; --card:#ffffff; --ink:#23231f; --muted:#6b6a64; --line:rgba(0,0,0,.08);
@@ -105,6 +106,8 @@
     <span><i class="dot" style="background:var(--work)"></i>Deep work</span>
     <span><i class="dot" style="background:var(--rest)"></i>Personal</span>
   </div>
+
+  <div class="resetbar" style="margin:4px 4px 14px"><button id="remind">Turn on reminders</button></div>
 
   <div id="agenda">
     <div class="row health" data-start="07:15" data-end="07:25"><div class="tm">7:15<br>AM</div><div class="blk"><i class="ti ti-sun"></i><div><p class="bt">Wake up &amp; hydrate</p><p class="bs">Big glass of water first</p></div></div></div>
@@ -216,8 +219,8 @@
       });
     }
     var ag=document.getElementById('agenda'); ag.innerHTML=html;
-    ag.querySelectorAll('.comp').forEach(function(b){b.addEventListener('click',function(){var n=new Date();completed[b.dataset.id]=n.getHours()*60+n.getMinutes();saveState();render();});});
-    ag.querySelectorAll('.undo').forEach(function(b){b.addEventListener('click',function(){delete completed[b.dataset.id];saveState();render();});});
+    ag.querySelectorAll('.comp').forEach(function(b){b.addEventListener('click',function(){var n=new Date();completed[b.dataset.id]=n.getHours()*60+n.getMinutes();saveState();syncState();render();});});
+    ag.querySelectorAll('.undo').forEach(function(b){b.addEventListener('click',function(){delete completed[b.dataset.id];saveState();syncState();render();});});
     if(!scrolled){var nowEl=ag.querySelector('.row.now');if(nowEl){nowEl.scrollIntoView({block:'center',behavior:'smooth'});scrolled=true;}}
   }
   window.refresh=render;
@@ -226,8 +229,40 @@
   render();
   setInterval(render,30000);
   document.getElementById('resetday').addEventListener('click',function(){
-    if(confirm('Reset the day? This clears all completed items.')){completed={};saveState();scrolled=false;render();}
+    if(confirm('Reset the day? This clears all completed items.')){completed={};saveState();syncState();scrolled=false;render();}
   });
+
+  // ---- push reminders ----
+  var WORKER='https://myday-push.oevmcc.workers.dev';
+  var VAPID='BJcKkLl5EQmr5qfjzEQsWrwqfHfZ7wOZ9A5Ceh_1n7VCUDDs-y4MKxpnPToqY6gEmiJt7NDTkhdMURmCv00xw3c';
+  function uid(){return 'id-'+Math.random().toString(36).slice(2)+Date.now().toString(36);}
+  function getLocalId(){var v=null;try{v=localStorage.getItem('myday_id');}catch(e){}if(!v){v=uid();try{localStorage.setItem('myday_id',v);}catch(e){}}return v;}
+  function isSubbed(){try{return localStorage.getItem('myday_subbed')==='1';}catch(e){return false;}}
+  function tzMin(){return -new Date().getTimezoneOffset();}
+  function b64ToU8(s){s=s.replace(/-/g,'+').replace(/_/g,'/');var pad='='.repeat((4-s.length%4)%4);var raw=atob(s+pad);var u=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)u[i]=raw.charCodeAt(i);return u;}
+  function idbSet(key,val){return new Promise(function(res){var o=indexedDB.open('myday',1);o.onupgradeneeded=function(){o.result.createObjectStore('kv');};o.onsuccess=function(){try{var tx=o.result.transaction('kv','readwrite');tx.objectStore('kv').put(val,key);tx.oncomplete=function(){res(true);};tx.onerror=function(){res(false);};}catch(e){res(false);}};o.onerror=function(){res(false);};});}
+  function setRemindBtn(){var b=document.getElementById('remind');if(!b)return;if(isSubbed()){b.textContent='✓ Reminders on';b.disabled=true;}else{b.textContent='Turn on reminders';b.disabled=false;}}
+  function syncState(){if(!isSubbed())return;try{fetch(WORKER+'/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:getLocalId(),completed:completed,data:DATA,tz:tzMin()})});}catch(e){}}
+  async function enableReminders(btn){
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)){alert('This device can\'t do push here. On iPhone, open My Day from the Home Screen icon (not a browser tab), then try again.');return;}
+    btn.disabled=true;btn.textContent='Setting up…';
+    try{
+      var reg=await navigator.serviceWorker.register('sw.js');
+      await navigator.serviceWorker.ready;
+      var perm=await Notification.requestPermission();
+      if(perm!=='granted'){alert('Notifications weren\'t allowed. Turn them on for My Day in Settings, then try again.');setRemindBtn();return;}
+      var sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID)});
+      var id=getLocalId();
+      await idbSet('id',id);
+      var r=await fetch(WORKER+'/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,subscription:sub,data:DATA,completed:completed,tz:tzMin()})});
+      if(!r.ok)throw new Error('server '+r.status);
+      try{localStorage.setItem('myday_subbed','1');}catch(e){}
+      setRemindBtn();
+      alert('Reminders are on! You\'ll get a heads-up 10 minutes before each item.');
+    }catch(e){alert('Couldn\'t turn on reminders: '+e.message);setRemindBtn();}
+  }
+  setRemindBtn();
+  document.getElementById('remind').addEventListener('click',function(){enableReminders(this);});
 </script>
 </body>
 </html>
