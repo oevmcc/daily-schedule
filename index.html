@@ -10,6 +10,7 @@
 <title>My Day</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css" />
 <link rel="manifest" href="manifest.json" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <style>
   :root{
     --ink:#1b1f2e; --muted:#5a6178; --line:rgba(20,30,60,.10);
@@ -72,6 +73,11 @@
   .bs{font-size:12.5px;margin:2px 0 0;opacity:.85}
   .now .blk{box-shadow:0 0 0 2px var(--c), 0 12px 34px color-mix(in srgb, var(--c) 34%, transparent);transform:translateY(-1px)}
   .now .tm{font-weight:700;color:var(--ink)}
+  .drag-float{z-index:60}
+  .drag-float .blk{box-shadow:0 20px 55px rgba(20,30,70,.4)!important;transform:scale(1.04);opacity:.97}
+  .sortable-ghost{opacity:.4}
+  .sortable-ghost .blk{border-style:dashed}
+  .row:not(.done):not(.fixedrow) .blk{cursor:grab}
   .comp{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.55;padding:0;transition:all .15s ease}
   .comp:hover,.comp:active{opacity:1;background:currentColor}
   .comp:hover i,.comp:active i{color:#fff}
@@ -178,8 +184,11 @@
 <script>
   var CFG=null, view='today', scrolled=false;
   var SKEY='myday_state_v2', state={};
+  var OKEY='myday_order_v1', orders={};
   function loadState(){try{state=JSON.parse(localStorage.getItem(SKEY)||'{}')||{};}catch(e){state={};}}
   function saveState(){try{localStorage.setItem(SKEY,JSON.stringify(state));}catch(e){}}
+  function loadOrders(){try{orders=JSON.parse(localStorage.getItem(OKEY)||'{}')||{};}catch(e){orders={};}}
+  function saveOrders(){try{localStorage.setItem(OKEY,JSON.stringify(orders));}catch(e){}}
   function mins(s){var p=String(s).split(':');return (+p[0])*60+(+p[1]);}
   function fmt(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h%12||12;return {t:h12+':'+(mm<10?'0'+mm:mm),ap:ap};}
   function fmtFull(m){var f=fmt(m);return f.t+' '+f.ap;}
@@ -201,19 +210,22 @@
     var raw=[].concat(tag(CFG.anchors,false),tag((CFG.weekly||{})[dk],false),tag(appts(ds),true));
     return raw.map(mapItem).sort(byOrig);
   }
-  function computeStarts(active,completed,nm){
-    var flex=active.filter(function(it){return !it.fixed;}).slice().sort(byOrig);
+  function computeStarts(active,completed,nm,order){
+    var flex=active.filter(function(it){return !it.fixed;}).slice();
     var fix=active.filter(function(it){return it.fixed;});
+    var manual=!!(order&&order.length);
+    if(manual){var idx={};order.forEach(function(id,i){idx[id]=i;});flex.sort(function(a,b){var ia=(a.id in idx)?idx[a.id]:5000+a.orig/1440,ib=(b.id in idx)?idx[b.id]:5000+b.orig/1440;return ia-ib;});}
+    else flex.sort(byOrig);
     var lastFlow=null; for(var id in completed){var c=completed[id]; if(c!=null&&(lastFlow===null||c>lastFlow))lastFlow=c;}
-    var cur=lastFlow!==null?lastFlow:0, out=[];
-    flex.forEach(function(it){var s=Math.max(cur,it.orig); if(nm>=s+it.dur)s=nm; cur=s+it.dur; out.push({it:it,start:s});});
+    var cur=lastFlow!==null?lastFlow:(flex.length?flex[0].orig:0), out=[];
+    flex.forEach(function(it){var s=manual?cur:Math.max(cur,it.orig); if(nm>=s+it.dur)s=nm; cur=s+it.dur; out.push({it:it,start:s});});
     fix.forEach(function(it){out.push({it:it,start:it.orig});});
     out.sort(function(a,b){return a.start-b.start;});
     return out;
   }
 
   function rowHtml(it,f,isNow,showBtn){
-    return '<div class="row '+it.cat+(isNow?' now':'')+'"><div class="tm">'+f.t+'<br>'+f.ap+'</div>'+
+    return '<div class="row '+it.cat+(isNow?' now':'')+(it.fixed?' fixedrow':'')+'" data-id="'+it.id+'"><div class="tm">'+f.t+'<br>'+f.ap+'</div>'+
       '<div class="blk"><i class="ti '+it.icon+'"></i><div><p class="bt">'+esc(it.title)+'</p><p class="bs">'+esc(it.sub)+'</p></div>'+
       (showBtn?'<button class="comp" data-id="'+it.id+'" aria-label="Mark complete"><i class="ti ti-check"></i></button>':'')+
       '</div></div>';
@@ -231,14 +243,27 @@
     var doneItems=DATA.filter(function(it){return completed[it.id]!=null;}).sort(function(a,b){return completed[a.id]-completed[b.id];});
     var html='';
     if(!DATA.length) html='<p class="emptyday" style="text-align:center;padding:16px 0">Nothing scheduled today.</p>';
-    computeStarts(active,completed,nm).forEach(function(o){
+    computeStarts(active,completed,nm,orders[ds]).forEach(function(o){
       html+=rowHtml(o.it,fmt(o.start),(nm>=o.start&&nm<o.start+o.it.dur),true);
     });
     if(doneItems.length){ html+='<div class="donehdr">Completed</div>'; doneItems.forEach(function(it){html+=doneRowHtml(it,completed[it.id]);}); }
     ag.innerHTML=html;
     ag.querySelectorAll('.comp').forEach(function(b){b.addEventListener('click',function(){var n=new Date();(state[ds]=state[ds]||{})[b.dataset.id]=n.getHours()*60+n.getMinutes();saveState();syncState();render();});});
     ag.querySelectorAll('.undo').forEach(function(b){b.addEventListener('click',function(){if(state[ds])delete state[ds][b.dataset.id];saveState();syncState();render();});});
+    initSort(ag,ds);
     if(!scrolled){var ne=ag.querySelector('.row.now');if(ne){ne.scrollIntoView({block:'center',behavior:'smooth'});scrolled=true;}}
+  }
+  var sortable=null, dragging=false;
+  function initSort(ag,ds){
+    if(typeof Sortable==='undefined')return;
+    if(sortable){try{sortable.destroy();}catch(e){}sortable=null;}
+    sortable=new Sortable(ag,{
+      draggable:'.row:not(.done)', filter:'.comp,.undo,.fixedrow,.donehdr',
+      animation:160, delay:220, delayOnTouchOnly:true, touchStartThreshold:6,
+      forceFallback:true, fallbackClass:'drag-float',
+      onStart:function(){dragging=true;},
+      onEnd:function(){dragging=false;var ids=[];ag.querySelectorAll('.row:not(.done)').forEach(function(r){if(r.dataset.id)ids.push(r.dataset.id);});orders[ds]=ids;saveOrders();syncState();render();}
+    });
   }
   function renderPlanned(ag,items){
     if(!items.length){ag.innerHTML='<p class="emptyday" style="text-align:center;padding:16px 0">Nothing scheduled.</p>';return;}
@@ -283,7 +308,7 @@
   function b64ToU8(s){s=s.replace(/-/g,'+').replace(/_/g,'/');var pad='='.repeat((4-s.length%4)%4);var raw=atob(s+pad);var u=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)u[i]=raw.charCodeAt(i);return u;}
   function idbSet(k,v){return new Promise(function(res){var o=indexedDB.open('myday',1);o.onupgradeneeded=function(){o.result.createObjectStore('kv');};o.onsuccess=function(){try{var tx=o.result.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=function(){res(true);};tx.onerror=function(){res(false);};}catch(e){res(false);}};o.onerror=function(){res(false);};});}
   function setRemindBtn(){var b=document.getElementById('remind');if(!b)return;if(isSubbed()){b.textContent='✓ Reminders on';b.disabled=true;}else{b.textContent='Turn on reminders';b.disabled=false;}}
-  function syncState(){if(!isSubbed())return;var ds=dateStr(new Date());try{fetch(WORKER+'/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:getLocalId(),date:ds,completed:state[ds]||{},tz:tzMin()})});}catch(e){}}
+  function syncState(){if(!isSubbed())return;var ds=dateStr(new Date());try{fetch(WORKER+'/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:getLocalId(),date:ds,completed:state[ds]||{},order:orders[ds]||null,tz:tzMin()})});}catch(e){}}
   async function enableReminders(btn){
     if(!('serviceWorker' in navigator)||!('PushManager' in window)){alert('This device can\'t do push here. On iPhone, open My Day from the Home Screen icon (not a browser tab), then try again.');return;}
     btn.disabled=true;btn.textContent='Setting up…';
@@ -295,7 +320,7 @@
       var sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID)});
       var id=getLocalId(); await idbSet('id',id);
       var ds=dateStr(new Date());
-      var r=await fetch(WORKER+'/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,subscription:sub,date:ds,completed:state[ds]||{},tz:tzMin()})});
+      var r=await fetch(WORKER+'/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,subscription:sub,date:ds,completed:state[ds]||{},order:orders[ds]||null,tz:tzMin()})});
       if(!r.ok)throw new Error('server '+r.status);
       try{localStorage.setItem('myday_subbed','1');}catch(e){}
       setRemindBtn();
@@ -305,17 +330,18 @@
 
   // ---- boot ----
   loadState();
+  loadOrders();
   function boot(){
     fetch('schedule.json?t='+Date.now()).then(function(r){return r.json();}).then(function(j){
       CFG=j; try{localStorage.setItem('myday_cfg',JSON.stringify(j));}catch(e){} render();
     }).catch(function(){ try{CFG=JSON.parse(localStorage.getItem('myday_cfg'));}catch(e){} render(); });
   }
   boot();
-  setInterval(function(){ if(view==='today') render(); },30000);
+  setInterval(function(){ if(view==='today' && !dragging) render(); },30000);
   document.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){view=b.dataset.view;scrolled=false;render();});});
   setRemindBtn();
   document.getElementById('remind').addEventListener('click',function(){enableReminders(this);});
-  document.getElementById('resetday').addEventListener('click',function(){var ds=dateStr(new Date());if(confirm('Reset today? This clears completed items for today.')){state[ds]={};saveState();syncState();scrolled=false;render();}});
+  document.getElementById('resetday').addEventListener('click',function(){var ds=dateStr(new Date());if(confirm('Reset today? Clears completed items and any manual reordering.')){state[ds]={};delete orders[ds];saveState();saveOrders();syncState();scrolled=false;render();}});
 </script>
 </body>
 </html>
