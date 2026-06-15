@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="My Day" />
-<title>My Day — Monday, June 15</title>
+<title>My Day</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css" />
 <link rel="manifest" href="manifest.json" />
 <style>
@@ -17,6 +17,7 @@
     --logi:#185fa5;  --logi-bg:#e6f1fb;
     --work:#854f0b;  --work-bg:#faeeda;
     --rest:#5f5e5a;  --rest-bg:#f1efe8;
+    --care:#993556;  --care-bg:#fbeaf0;
   }
   @media (prefers-color-scheme: dark){
     :root{
@@ -25,6 +26,7 @@
       --logi:#85b7eb;  --logi-bg:#0c365a;
       --work:#efb05a;  --work-bg:#4a3208;
       --rest:#b4b2a9;  --rest-bg:#33322d;
+      --care:#ed93b1;  --care-bg:#4b1528;
     }
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -32,12 +34,14 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     line-height:1.5;padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 32px)}
   .wrap{max-width:560px;margin:0 auto;padding:20px 16px}
-  header{margin:8px 4px 18px}
+  header{margin:8px 4px 10px}
   .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin:0}
   h1{font-size:26px;font-weight:600;margin:4px 0 2px}
-  .sub{font-size:14px;color:var(--muted);margin:0}
-  .clock{font-size:13px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px}
-  .leg{display:flex;flex-wrap:wrap;gap:12px;margin:14px 4px 6px;font-size:12.5px;color:var(--muted)}
+  .clock{font-size:13px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+  .tabs{display:flex;gap:6px;margin:12px 4px 14px}
+  .tabs button{flex:1;padding:9px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;font-size:13px;cursor:pointer}
+  .tabs button.active{background:var(--health-bg);color:var(--health);border-color:transparent;font-weight:600}
+  .leg{display:flex;flex-wrap:wrap;gap:12px;margin:0 4px 6px;font-size:12.5px;color:var(--muted)}
   .leg span{display:flex;align-items:center;gap:6px}
   .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
   .row{display:grid;grid-template-columns:58px 1fr;gap:10px;margin:8px 0}
@@ -51,12 +55,28 @@
   .logi   .blk{background:var(--logi-bg);color:var(--logi)}
   .work   .blk{background:var(--work-bg);color:var(--work)}
   .rest   .blk{background:var(--rest-bg);color:var(--rest)}
+  .care   .blk{background:var(--care-bg);color:var(--care)}
   .now .blk{border-color:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 18%,transparent)}
   .now .tm{font-weight:700;color:var(--ink)}
-  .pastdim{opacity:.45}
-  .nowtag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-    margin-left:auto;padding:3px 8px;border-radius:999px;background:currentColor;flex:none}
-  .nowtag b{color:var(--card)}
+  .comp{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.6;padding:0}
+  .comp:hover,.comp:active{opacity:1;background:currentColor}
+  .comp:hover i,.comp:active i{color:var(--card)}
+  .row.done .blk{opacity:.55}
+  .row.done .bt{text-decoration:line-through}
+  .row.done .tm{font-size:20px;color:var(--health);padding-top:10px}
+  .undo{margin-left:auto;flex:none;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;text-decoration:underline;padding:4px}
+  .donehdr{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:20px 4px 8px;border-top:1px solid var(--line);padding-top:14px}
+  .dayhdr{font-weight:600;font-size:14px;margin:16px 4px 8px;padding-top:12px;border-top:1px solid var(--line)}
+  .dayhdr.first{border-top:none;padding-top:0;margin-top:4px}
+  .emptyday{color:var(--muted);font-size:13px;margin:0 4px 6px}
+  .weekrow{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;margin:5px 0;background:var(--card);border:1px solid var(--line)}
+  .weekrow .wt{font-size:12px;color:var(--muted);width:62px;flex:none}
+  .weekrow i{font-size:18px;flex:none}
+  .weekrow .wn{font-size:14px}
+  .weekrow.health i{color:var(--health)} .weekrow.logi i{color:var(--logi)}
+  .weekrow.work i{color:var(--work)} .weekrow.rest i{color:var(--rest)} .weekrow.care i{color:var(--care)}
+  .bar{margin:14px 4px 0;text-align:center}
+  .bar button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px 16px;font-size:13px;cursor:pointer}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
   body.locked .wrap{display:none}
   #gate{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
@@ -69,16 +89,6 @@
   #pw:focus{outline:none;border-color:var(--health)}
   #go{width:100%;margin-top:10px;font-size:16px;font-weight:600;padding:12px;border:none;border-radius:12px;background:var(--health);color:#fff;cursor:pointer}
   #err{color:#c0392b;font-size:13px;min-height:18px;margin-top:10px}
-  .comp{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.6;padding:0}
-  .comp:hover,.comp:active{opacity:1;background:currentColor}
-  .comp:hover i,.comp:active i{color:var(--card)}
-  .row.done .blk{opacity:.55}
-  .row.done .bt{text-decoration:line-through}
-  .row.done .tm{font-size:20px;color:var(--health);padding-top:10px}
-  .undo{margin-left:auto;flex:none;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;text-decoration:underline;padding:4px}
-  .donehdr{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:20px 4px 8px;border-top:1px solid var(--line);padding-top:14px}
-  .resetbar{margin:18px 4px 0;text-align:center}
-  .resetbar button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px 16px;font-size:13px;cursor:pointer}
 </style>
 </head>
 <body class="locked">
@@ -94,47 +104,31 @@
 </div>
 <div class="wrap">
   <header>
-    <p class="eyebrow">Your day</p>
-    <h1>Monday, June 15</h1>
-    <p class="sub">Stay on track · stay healthy</p>
+    <p class="eyebrow" id="dayEyebrow">Today</p>
+    <h1 id="dayTitle">My Day</h1>
     <p class="clock"><i class="ti ti-clock"></i><span id="clock">—</span></p>
   </header>
+
+  <div class="tabs">
+    <button data-view="today" class="active">Today</button>
+    <button data-view="tomorrow">Tomorrow</button>
+    <button data-view="week">Week</button>
+  </div>
 
   <div class="leg">
     <span><i class="dot" style="background:var(--health)"></i>Health</span>
     <span><i class="dot" style="background:var(--logi)"></i>Logistics</span>
-    <span><i class="dot" style="background:var(--work)"></i>Deep work</span>
-    <span><i class="dot" style="background:var(--rest)"></i>Personal</span>
+    <span><i class="dot" style="background:var(--work)"></i>Work</span>
+    <span><i class="dot" style="background:var(--care)"></i>Care</span>
+    <span><i class="dot" style="background:var(--rest)"></i>Rest</span>
   </div>
 
-  <div class="resetbar" style="margin:4px 4px 14px"><button id="remind">Turn on reminders</button></div>
+  <div id="agenda"></div>
 
-  <div id="agenda">
-    <div class="row health" data-start="07:15" data-end="07:25"><div class="tm">7:15<br>AM</div><div class="blk"><i class="ti ti-sun"></i><div><p class="bt">Wake up &amp; hydrate</p><p class="bs">Big glass of water first</p></div></div></div>
-    <div class="row rest" data-start="07:25" data-end="07:30"><div class="tm">7:25<br>AM</div><div class="blk"><i class="ti ti-paw"></i><div><p class="bt">Feed the dog</p><p class="bs">Every morning · don't forget</p></div></div></div>
-    <div class="row health" data-start="07:30" data-end="08:00"><div class="tm">7:30<br>AM</div><div class="blk"><i class="ti ti-egg"></i><div><p class="bt">Breakfast with Emma</p><p class="bs">Protein + fruit · 30 min</p></div></div></div>
-    <div class="row health" data-start="08:00" data-end="09:15"><div class="tm">8:00<br>AM</div><div class="blk"><i class="ti ti-barbell"></i><div><p class="bt">Gym workout</p><p class="bs">Non-negotiable · 60 min</p></div></div></div>
-    <div class="row rest" data-start="09:15" data-end="09:45"><div class="tm">9:15<br>AM</div><div class="blk"><i class="ti ti-shirt"></i><div><p class="bt">Shower &amp; get ready</p><p class="bs">30 min</p></div></div></div>
-    <div class="row logi" data-start="09:45" data-end="10:15"><div class="tm">9:45<br>AM</div><div class="blk"><i class="ti ti-car"></i><div><p class="bt">Drive Mesquite → Dallas</p><p class="bs">Grace Ln → Rockbrook Dr · ~30 min</p></div></div></div>
-    <div class="row logi" data-start="10:15" data-end="10:30"><div class="tm">10:15<br>AM</div><div class="blk"><i class="ti ti-user-heart"></i><div><p class="bt">Drop off Emma</p><p class="bs">Rockbrook Dr</p></div></div></div>
-    <div class="row logi" data-start="10:30" data-end="11:45"><div class="tm">10:30<br>AM</div><div class="blk"><i class="ti ti-building-bank"></i><div><p class="bt">Bank — open Nova Lobo account</p><p class="bs">Bring EIN + ID · ~1 hr</p></div></div></div>
-    <div class="row logi" data-start="11:45" data-end="12:30"><div class="tm">11:45<br>AM</div><div class="blk"><i class="ti ti-building-warehouse"></i><div><p class="bt">Storage units for Aunt Mary</p><p class="bs">Compare size + price · ~45 min</p></div></div></div>
-    <div class="row logi" data-start="12:30" data-end="13:00"><div class="tm">12:30<br>PM</div><div class="blk"><i class="ti ti-car"></i><div><p class="bt">Drive Dallas → Mesquite</p><p class="bs">Rockbrook Dr → Grace Ln · ~30 min</p></div></div></div>
-    <div class="row health" data-start="13:00" data-end="13:45"><div class="tm">1:00<br>PM</div><div class="blk"><i class="ti ti-salad"></i><div><p class="bt">Lunch</p><p class="bs">Something real · 45 min</p></div></div></div>
-    <div class="row work" data-start="13:45" data-end="15:45"><div class="tm">1:45<br>PM</div><div class="blk"><i class="ti ti-device-tv"></i><div><p class="bt">Players TV site — focus block 1</p><p class="bs">Phone on silent · 2 hr</p></div></div></div>
-    <div class="row health" data-start="15:45" data-end="16:00"><div class="tm">3:45<br>PM</div><div class="blk"><i class="ti ti-walk"></i><div><p class="bt">Movement break</p><p class="bs">Walk + water · 15 min</p></div></div></div>
-    <div class="row work" data-start="16:00" data-end="17:45"><div class="tm">4:00<br>PM</div><div class="blk"><i class="ti ti-device-tv"></i><div><p class="bt">Players TV site — focus block 2</p><p class="bs">~1 hr 45 min</p></div></div></div>
-    <div class="row health" data-start="17:45" data-end="18:00"><div class="tm">5:45<br>PM</div><div class="blk"><i class="ti ti-apple"></i><div><p class="bt">Snack &amp; stretch</p><p class="bs">15 min</p></div></div></div>
-    <div class="row work" data-start="18:00" data-end="19:15"><div class="tm">6:00<br>PM</div><div class="blk"><i class="ti ti-device-tv"></i><div><p class="bt">Players TV site — wrap-up</p><p class="bs">Note tomorrow's first task · 75 min</p></div></div></div>
-    <div class="row health" data-start="19:30" data-end="20:15"><div class="tm">7:30<br>PM</div><div class="blk"><i class="ti ti-tools-kitchen-2"></i><div><p class="bt">Dinner with Emma</p><p class="bs">Healthy + unwind · 45 min</p></div></div></div>
-    <div class="row rest" data-start="20:15" data-end="22:15"><div class="tm">8:15<br>PM</div><div class="blk"><i class="ti ti-heart"></i><div><p class="bt">Free time with Emma</p><p class="bs">Relax, no work</p></div></div></div>
-    <div class="row health" data-start="22:15" data-end="23:15"><div class="tm">10:15<br>PM</div><div class="blk"><i class="ti ti-moon"></i><div><p class="bt">Wind down — screens off</p><p class="bs">Dim lights, prep for sleep</p></div></div></div>
-    <div class="row rest" data-start="23:15" data-end="23:59"><div class="tm">11:15<br>PM</div><div class="blk"><i class="ti ti-bed"></i><div><p class="bt">Sleep</p><p class="bs">Aim for 8 hours</p></div></div></div>
-  </div>
+  <div class="bar" id="resetbarwrap"><button id="resetday">Reset today</button></div>
+  <div class="bar" style="margin-top:10px"><button id="remind">Turn on reminders</button></div>
 
-  <div class="resetbar"><button id="resetday">Reset day</button></div>
-
-  <footer>Built for you · tap &amp; hold the share button to “Add to Home Screen”</footer>
+  <footer>My Day · open from your Home Screen icon for reminders</footer>
 </div>
 
 <script>
@@ -164,73 +158,102 @@
   })();
 </script>
 <script>
-  function mins(s){var p=s.split(":");return (+p[0])*60+(+p[1]);}
-  var SKEY="myday_state_v1";
-  var DATA=[];
-  var completed={};
-  var scrolled=false;
-  function loadState(){try{completed=JSON.parse(localStorage.getItem(SKEY)||"{}")||{};}catch(e){completed={};}}
-  function saveState(){try{localStorage.setItem(SKEY,JSON.stringify(completed));}catch(e){}}
-  function parse(){
-    document.querySelectorAll('#agenda .row').forEach(function(r,idx){
-      var cls=['health','logi','work','rest'].filter(function(c){return r.classList.contains(c);})[0]||'rest';
-      DATA.push({id:'i'+idx,cls:cls,
-        icon:r.querySelector('.blk > i').className,
-        title:r.querySelector('.bt').innerHTML,
-        sub:r.querySelector('.bs').innerHTML,
-        dur:mins(r.dataset.end)-mins(r.dataset.start),
-        orig:mins(r.dataset.start)});
-    });
-  }
-  function fmt(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=m%60;var ap=h<12?'AM':'PM';var h12=h%12||12;return {t:h12+':'+(mm<10?'0'+mm:mm),ap:ap};}
+  var CFG=null, view='today', scrolled=false;
+  var SKEY='myday_state_v2', state={};
+  function loadState(){try{state=JSON.parse(localStorage.getItem(SKEY)||'{}')||{};}catch(e){state={};}}
+  function saveState(){try{localStorage.setItem(SKEY,JSON.stringify(state));}catch(e){}}
+  function mins(s){var p=String(s).split(':');return (+p[0])*60+(+p[1]);}
+  function fmt(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h%12||12;return {t:h12+':'+(mm<10?'0'+mm:mm),ap:ap};}
   function fmtFull(m){var f=fmt(m);return f.t+' '+f.ap;}
-  function render(){
-    var now=new Date();
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function pad2(n){return n<10?'0'+n:''+n;}
+  function dateForOffset(off){var d=new Date();d.setDate(d.getDate()+off);return d;}
+  function dateStr(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+  var DOW=['sun','mon','tue','wed','thu','fri','sat'];
+  var DOWLONG=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function slug(s){return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,24);}
+  function mapItem(it){return {id:it.id||((it.cat||'x')+'-'+(it.time||'')+'-'+slug(it.title)),orig:mins(it.time),dur:it.dur||30,title:it.title||'',sub:it.sub||'',cat:it.cat||'rest',icon:it.icon||'ti-circle',fixed:!!it._fixed};}
+  function byOrig(a,b){return a.orig-b.orig;}
+  function appts(ds){return (CFG&&CFG.appointments&&CFG.appointments[ds])||[];}
+  function tag(arr,def){return (arr||[]).map(function(it){var o={};for(var k in it)o[k]=it[k];o._fixed=(it.fixed!==undefined)?!!it.fixed:def;return o;});}
+  function buildDay(d){
+    if(!CFG)return [];
+    var ds=dateStr(d),dk=DOW[d.getDay()];
+    var raw=[].concat(tag(CFG.anchors,false),tag((CFG.weekly||{})[dk],false),tag(appts(ds),true));
+    return raw.map(mapItem).sort(byOrig);
+  }
+  function computeStarts(active,completed,nm){
+    var flex=active.filter(function(it){return !it.fixed;}).slice().sort(byOrig);
+    var fix=active.filter(function(it){return it.fixed;});
+    var lastFlow=null; for(var id in completed){var c=completed[id]; if(c!=null&&(lastFlow===null||c>lastFlow))lastFlow=c;}
+    var cur=lastFlow!==null?lastFlow:(flex.length?flex[0].orig:0), out=[];
+    flex.forEach(function(it){var s=cur,e=s+it.dur; if(nm>=e){s=nm;e=nm+it.dur;} cur=e; out.push({it:it,start:s});});
+    fix.forEach(function(it){out.push({it:it,start:it.orig});});
+    out.sort(function(a,b){return a.start-b.start;});
+    return out;
+  }
+
+  function rowHtml(it,f,isNow,showBtn){
+    return '<div class="row '+it.cat+(isNow?' now':'')+'"><div class="tm">'+f.t+'<br>'+f.ap+'</div>'+
+      '<div class="blk"><i class="ti '+it.icon+'"></i><div><p class="bt">'+esc(it.title)+'</p><p class="bs">'+esc(it.sub)+'</p></div>'+
+      (showBtn?'<button class="comp" data-id="'+it.id+'" aria-label="Mark complete"><i class="ti ti-check"></i></button>':'')+
+      '</div></div>';
+  }
+  function doneRowHtml(it,doneMin){
+    return '<div class="row '+it.cat+' done"><div class="tm"><i class="ti ti-check"></i></div>'+
+      '<div class="blk"><i class="ti '+it.icon+'"></i><div><p class="bt">'+esc(it.title)+'</p><p class="bs">Done at '+fmtFull(doneMin)+'</p></div>'+
+      '<button class="undo" data-id="'+it.id+'">undo</button></div></div>';
+  }
+
+  function renderLive(ag,DATA,ds,now){
     var nm=now.getHours()*60+now.getMinutes();
-    var clk=document.getElementById('clock');
-    if(clk) clk.textContent=now.toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'});
-    var lastFlow=null;
-    DATA.forEach(function(it){if(completed[it.id]!=null && (lastFlow===null||completed[it.id]>lastFlow)) lastFlow=completed[it.id];});
+    var completed=state[ds]||{};
     var active=DATA.filter(function(it){return completed[it.id]==null;});
     var doneItems=DATA.filter(function(it){return completed[it.id]!=null;}).sort(function(a,b){return completed[a.id]-completed[b.id];});
-    var base=(lastFlow!==null)?lastFlow:(active.length?active[0].orig:0);
-    var cursor=base, html='';
-    active.forEach(function(it){
-      var start=cursor, end=start+it.dur;
-      if(nm>=end){ start=nm; end=nm+it.dur; }
-      cursor=end;
-      var f=fmt(start), isNow=(nm>=start&&nm<end);
-      html+='<div class="row '+it.cls+(isNow?' now':'')+'">'+
-        '<div class="tm">'+f.t+'<br>'+f.ap+'</div>'+
-        '<div class="blk"><i class="'+it.icon+'"></i>'+
-        '<div><p class="bt">'+it.title+'</p><p class="bs">'+it.sub+'</p></div>'+
-        '<button class="comp" data-id="'+it.id+'" aria-label="Mark '+it.title.replace(/"/g,'')+' complete"><i class="ti ti-check"></i></button>'+
-        '</div></div>';
+    var html='';
+    if(!DATA.length) html='<p class="emptyday" style="text-align:center;padding:16px 0">Nothing scheduled today.</p>';
+    computeStarts(active,completed,nm).forEach(function(o){
+      html+=rowHtml(o.it,fmt(o.start),(nm>=o.start&&nm<o.start+o.it.dur),true);
     });
-    if(doneItems.length){
-      html+='<div class="donehdr">Completed</div>';
-      doneItems.forEach(function(it){
-        html+='<div class="row '+it.cls+' done">'+
-          '<div class="tm"><i class="ti ti-check"></i></div>'+
-          '<div class="blk"><i class="'+it.icon+'"></i>'+
-          '<div><p class="bt">'+it.title+'</p><p class="bs">Done at '+fmtFull(completed[it.id])+'</p></div>'+
-          '<button class="undo" data-id="'+it.id+'">undo</button>'+
-          '</div></div>';
-      });
+    if(doneItems.length){ html+='<div class="donehdr">Completed</div>'; doneItems.forEach(function(it){html+=doneRowHtml(it,completed[it.id]);}); }
+    ag.innerHTML=html;
+    ag.querySelectorAll('.comp').forEach(function(b){b.addEventListener('click',function(){var n=new Date();(state[ds]=state[ds]||{})[b.dataset.id]=n.getHours()*60+n.getMinutes();saveState();syncState();render();});});
+    ag.querySelectorAll('.undo').forEach(function(b){b.addEventListener('click',function(){if(state[ds])delete state[ds][b.dataset.id];saveState();syncState();render();});});
+    if(!scrolled){var ne=ag.querySelector('.row.now');if(ne){ne.scrollIntoView({block:'center',behavior:'smooth'});scrolled=true;}}
+  }
+  function renderPlanned(ag,items){
+    if(!items.length){ag.innerHTML='<p class="emptyday" style="text-align:center;padding:16px 0">Nothing scheduled.</p>';return;}
+    var html=''; items.forEach(function(it){html+=rowHtml(it,fmt(it.orig),false,false);}); ag.innerHTML=html;
+  }
+  function renderWeek(ag){
+    var html='';
+    for(var off=0;off<7;off++){
+      var d=dateForOffset(off),ds=dateStr(d);
+      var label=(off===0?'Today':off===1?'Tomorrow':DOWLONG[d.getDay()])+' · '+MON[d.getMonth()]+' '+d.getDate();
+      html+='<div class="dayhdr'+(off===0?' first':'')+'">'+label+'</div>';
+      var items=(off<=1)?buildDay(d):appts(ds).map(mapItem).sort(byOrig);
+      if(!items.length){ html+='<div class="emptyday">'+(off<=1?'Nothing scheduled':'No appointments')+'</div>'; }
+      else items.forEach(function(it){var f=fmt(it.orig);html+='<div class="weekrow '+it.cat+'"><span class="wt">'+f.t+' '+f.ap+'</span><i class="ti '+it.icon+'"></i><span class="wn">'+esc(it.title)+'</span></div>';});
     }
-    var ag=document.getElementById('agenda'); ag.innerHTML=html;
-    ag.querySelectorAll('.comp').forEach(function(b){b.addEventListener('click',function(){var n=new Date();completed[b.dataset.id]=n.getHours()*60+n.getMinutes();saveState();syncState();render();});});
-    ag.querySelectorAll('.undo').forEach(function(b){b.addEventListener('click',function(){delete completed[b.dataset.id];saveState();syncState();render();});});
-    if(!scrolled){var nowEl=ag.querySelector('.row.now');if(nowEl){nowEl.scrollIntoView({block:'center',behavior:'smooth'});scrolled=true;}}
+    ag.innerHTML=html;
+  }
+
+  function render(){
+    var now=new Date();
+    var c=document.getElementById('clock'); if(c)c.textContent=now.toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'});
+    document.querySelectorAll('.tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.view===view);});
+    var ag=document.getElementById('agenda'), reset=document.getElementById('resetbarwrap');
+    if(!CFG){ ag.innerHTML='<p class="emptyday" style="text-align:center;padding:16px 0">Loading…</p>'; return; }
+    if(view==='week'){ document.getElementById('dayEyebrow').textContent='Next 7 days'; document.getElementById('dayTitle').textContent='Your week'; if(reset)reset.style.display='none'; renderWeek(ag); return; }
+    if(reset)reset.style.display='';
+    var off=view==='tomorrow'?1:0, d=dateForOffset(off), live=off===0;
+    document.getElementById('dayEyebrow').textContent=live?'Today':'Tomorrow';
+    document.getElementById('dayTitle').textContent=DOWLONG[d.getDay()]+', '+MON[d.getMonth()]+' '+d.getDate();
+    var items=buildDay(d);
+    if(live) renderLive(ag,items,dateStr(d),now); else renderPlanned(ag,items);
   }
   window.refresh=render;
-  loadState();
-  parse();
-  render();
-  setInterval(render,30000);
-  document.getElementById('resetday').addEventListener('click',function(){
-    if(confirm('Reset the day? This clears all completed items.')){completed={};saveState();syncState();scrolled=false;render();}
-  });
 
   // ---- push reminders ----
   var WORKER='https://myday-push.oevmcc.workers.dev';
@@ -240,9 +263,9 @@
   function isSubbed(){try{return localStorage.getItem('myday_subbed')==='1';}catch(e){return false;}}
   function tzMin(){return -new Date().getTimezoneOffset();}
   function b64ToU8(s){s=s.replace(/-/g,'+').replace(/_/g,'/');var pad='='.repeat((4-s.length%4)%4);var raw=atob(s+pad);var u=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)u[i]=raw.charCodeAt(i);return u;}
-  function idbSet(key,val){return new Promise(function(res){var o=indexedDB.open('myday',1);o.onupgradeneeded=function(){o.result.createObjectStore('kv');};o.onsuccess=function(){try{var tx=o.result.transaction('kv','readwrite');tx.objectStore('kv').put(val,key);tx.oncomplete=function(){res(true);};tx.onerror=function(){res(false);};}catch(e){res(false);}};o.onerror=function(){res(false);};});}
+  function idbSet(k,v){return new Promise(function(res){var o=indexedDB.open('myday',1);o.onupgradeneeded=function(){o.result.createObjectStore('kv');};o.onsuccess=function(){try{var tx=o.result.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=function(){res(true);};tx.onerror=function(){res(false);};}catch(e){res(false);}};o.onerror=function(){res(false);};});}
   function setRemindBtn(){var b=document.getElementById('remind');if(!b)return;if(isSubbed()){b.textContent='✓ Reminders on';b.disabled=true;}else{b.textContent='Turn on reminders';b.disabled=false;}}
-  function syncState(){if(!isSubbed())return;try{fetch(WORKER+'/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:getLocalId(),completed:completed,data:DATA,tz:tzMin()})});}catch(e){}}
+  function syncState(){if(!isSubbed())return;var ds=dateStr(new Date());try{fetch(WORKER+'/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:getLocalId(),date:ds,completed:state[ds]||{},tz:tzMin()})});}catch(e){}}
   async function enableReminders(btn){
     if(!('serviceWorker' in navigator)||!('PushManager' in window)){alert('This device can\'t do push here. On iPhone, open My Day from the Home Screen icon (not a browser tab), then try again.');return;}
     btn.disabled=true;btn.textContent='Setting up…';
@@ -252,17 +275,29 @@
       var perm=await Notification.requestPermission();
       if(perm!=='granted'){alert('Notifications weren\'t allowed. Turn them on for My Day in Settings, then try again.');setRemindBtn();return;}
       var sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID)});
-      var id=getLocalId();
-      await idbSet('id',id);
-      var r=await fetch(WORKER+'/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,subscription:sub,data:DATA,completed:completed,tz:tzMin()})});
+      var id=getLocalId(); await idbSet('id',id);
+      var ds=dateStr(new Date());
+      var r=await fetch(WORKER+'/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,subscription:sub,date:ds,completed:state[ds]||{},tz:tzMin()})});
       if(!r.ok)throw new Error('server '+r.status);
       try{localStorage.setItem('myday_subbed','1');}catch(e){}
       setRemindBtn();
-      alert('Reminders are on! You\'ll get a heads-up 10 minutes before each item.');
+      alert('Reminders are on! You\'ll get a heads-up 10 minutes before each item, plus a 7pm nudge to plan tomorrow.');
     }catch(e){alert('Couldn\'t turn on reminders: '+e.message);setRemindBtn();}
   }
+
+  // ---- boot ----
+  loadState();
+  function boot(){
+    fetch('schedule.json?t='+Date.now()).then(function(r){return r.json();}).then(function(j){
+      CFG=j; try{localStorage.setItem('myday_cfg',JSON.stringify(j));}catch(e){} render();
+    }).catch(function(){ try{CFG=JSON.parse(localStorage.getItem('myday_cfg'));}catch(e){} render(); });
+  }
+  boot();
+  setInterval(function(){ if(view==='today') render(); },30000);
+  document.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){view=b.dataset.view;scrolled=false;render();});});
   setRemindBtn();
   document.getElementById('remind').addEventListener('click',function(){enableReminders(this);});
+  document.getElementById('resetday').addEventListener('click',function(){var ds=dateStr(new Date());if(confirm('Reset today? This clears completed items for today.')){state[ds]={};saveState();syncState();scrolled=false;render();}});
 </script>
 </body>
 </html>
