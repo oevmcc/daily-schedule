@@ -190,12 +190,14 @@
     DATA.forEach(function(it){if(completed[it.id]!=null && (lastFlow===null||completed[it.id]>lastFlow)) lastFlow=completed[it.id];});
     var active=DATA.filter(function(it){return completed[it.id]==null;});
     var doneItems=DATA.filter(function(it){return completed[it.id]!=null;}).sort(function(a,b){return completed[a.id]-completed[b.id];});
-    var cursor=lastFlow, html='';
+    var base=(lastFlow!==null)?lastFlow:(active.length?active[0].orig:0);
+    var cursor=base, html='';
     active.forEach(function(it){
-      var start=(lastFlow===null)?it.orig:cursor;
-      if(lastFlow!==null) cursor=start+it.dur;
-      var f=fmt(start), isNow=(nm>=start&&nm<start+it.dur), past=(nm>=start+it.dur);
-      html+='<div class="row '+it.cls+(isNow?' now':'')+(past?' pastdim':'')+'">'+
+      var start=cursor, end=start+it.dur;
+      if(nm>=end){ start=nm; end=nm+it.dur; }
+      cursor=end;
+      var f=fmt(start), isNow=(nm>=start&&nm<end);
+      html+='<div class="row '+it.cls+(isNow?' now':'')+'">'+
         '<div class="tm">'+f.t+'<br>'+f.ap+'</div>'+
         '<div class="blk"><i class="'+it.icon+'"></i>'+
         '<div><p class="bt">'+it.title+'</p><p class="bs">'+it.sub+'</p></div>'+
