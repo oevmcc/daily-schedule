@@ -68,6 +68,16 @@
   #pw:focus{outline:none;border-color:var(--health)}
   #go{width:100%;margin-top:10px;font-size:16px;font-weight:600;padding:12px;border:none;border-radius:12px;background:var(--health);color:#fff;cursor:pointer}
   #err{color:#c0392b;font-size:13px;min-height:18px;margin-top:10px}
+  .comp{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.6;padding:0}
+  .comp:hover,.comp:active{opacity:1;background:currentColor}
+  .comp:hover i,.comp:active i{color:var(--card)}
+  .row.done .blk{opacity:.55}
+  .row.done .bt{text-decoration:line-through}
+  .row.done .tm{font-size:20px;color:var(--health);padding-top:10px}
+  .undo{margin-left:auto;flex:none;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;text-decoration:underline;padding:4px}
+  .donehdr{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:20px 4px 8px;border-top:1px solid var(--line);padding-top:14px}
+  .resetbar{margin:18px 4px 0;text-align:center}
+  .resetbar button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px 16px;font-size:13px;cursor:pointer}
 </style>
 </head>
 <body class="locked">
@@ -119,6 +129,8 @@
     <div class="row rest" data-start="23:15" data-end="23:59"><div class="tm">11:15<br>PM</div><div class="blk"><i class="ti ti-bed"></i><div><p class="bt">Sleep</p><p class="bs">Aim for 8 hours</p></div></div></div>
   </div>
 
+  <div class="resetbar"><button id="resetday">Reset day</button></div>
+
   <footer>Built for you · tap &amp; hold the share button to “Add to Home Screen”</footer>
 </div>
 
@@ -150,28 +162,70 @@
 </script>
 <script>
   function mins(s){var p=s.split(":");return (+p[0])*60+(+p[1]);}
-  function refresh(){
-    var now=new Date();
-    var nm=now.getHours()*60+now.getMinutes();
-    document.getElementById('clock').textContent=now.toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'});
-    var rows=document.querySelectorAll('#agenda .row');
-    rows.forEach(function(r){
-      r.classList.remove('now','pastdim');
-      var s=mins(r.dataset.start), e=mins(r.dataset.end);
-      var tag=r.querySelector('.nowtag'); if(tag) tag.remove();
-      if(nm>=s && nm<e){
-        r.classList.add('now');
-        var b=r.querySelector('.blk');
-        var t=document.createElement('span'); t.className='nowtag'; t.innerHTML='<b>NOW</b>';
-        b.appendChild(t);
-        r.scrollIntoView({block:'center',behavior:'smooth'});
-      } else if(nm>=e){
-        r.classList.add('pastdim');
-      }
+  var SKEY="myday_state_v1";
+  var DATA=[];
+  var completed={};
+  var scrolled=false;
+  function loadState(){try{completed=JSON.parse(localStorage.getItem(SKEY)||"{}")||{};}catch(e){completed={};}}
+  function saveState(){try{localStorage.setItem(SKEY,JSON.stringify(completed));}catch(e){}}
+  function parse(){
+    document.querySelectorAll('#agenda .row').forEach(function(r,idx){
+      var cls=['health','logi','work','rest'].filter(function(c){return r.classList.contains(c);})[0]||'rest';
+      DATA.push({id:'i'+idx,cls:cls,
+        icon:r.querySelector('.blk > i').className,
+        title:r.querySelector('.bt').innerHTML,
+        sub:r.querySelector('.bs').innerHTML,
+        dur:mins(r.dataset.end)-mins(r.dataset.start),
+        orig:mins(r.dataset.start)});
     });
   }
-  refresh();
-  setInterval(refresh,30000);
+  function fmt(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=m%60;var ap=h<12?'AM':'PM';var h12=h%12||12;return {t:h12+':'+(mm<10?'0'+mm:mm),ap:ap};}
+  function fmtFull(m){var f=fmt(m);return f.t+' '+f.ap;}
+  function render(){
+    var now=new Date();
+    var nm=now.getHours()*60+now.getMinutes();
+    var clk=document.getElementById('clock');
+    if(clk) clk.textContent=now.toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'});
+    var lastFlow=null;
+    DATA.forEach(function(it){if(completed[it.id]!=null && (lastFlow===null||completed[it.id]>lastFlow)) lastFlow=completed[it.id];});
+    var active=DATA.filter(function(it){return completed[it.id]==null;});
+    var doneItems=DATA.filter(function(it){return completed[it.id]!=null;}).sort(function(a,b){return completed[a.id]-completed[b.id];});
+    var cursor=lastFlow, html='';
+    active.forEach(function(it){
+      var start=(lastFlow===null)?it.orig:cursor;
+      if(lastFlow!==null) cursor=start+it.dur;
+      var f=fmt(start), isNow=(nm>=start&&nm<start+it.dur), past=(nm>=start+it.dur);
+      html+='<div class="row '+it.cls+(isNow?' now':'')+(past?' pastdim':'')+'">'+
+        '<div class="tm">'+f.t+'<br>'+f.ap+'</div>'+
+        '<div class="blk"><i class="'+it.icon+'"></i>'+
+        '<div><p class="bt">'+it.title+'</p><p class="bs">'+it.sub+'</p></div>'+
+        '<button class="comp" data-id="'+it.id+'" aria-label="Mark '+it.title.replace(/"/g,'')+' complete"><i class="ti ti-check"></i></button>'+
+        '</div></div>';
+    });
+    if(doneItems.length){
+      html+='<div class="donehdr">Completed</div>';
+      doneItems.forEach(function(it){
+        html+='<div class="row '+it.cls+' done">'+
+          '<div class="tm"><i class="ti ti-check"></i></div>'+
+          '<div class="blk"><i class="'+it.icon+'"></i>'+
+          '<div><p class="bt">'+it.title+'</p><p class="bs">Done at '+fmtFull(completed[it.id])+'</p></div>'+
+          '<button class="undo" data-id="'+it.id+'">undo</button>'+
+          '</div></div>';
+      });
+    }
+    var ag=document.getElementById('agenda'); ag.innerHTML=html;
+    ag.querySelectorAll('.comp').forEach(function(b){b.addEventListener('click',function(){var n=new Date();completed[b.dataset.id]=n.getHours()*60+n.getMinutes();saveState();render();});});
+    ag.querySelectorAll('.undo').forEach(function(b){b.addEventListener('click',function(){delete completed[b.dataset.id];saveState();render();});});
+    if(!scrolled){var nowEl=ag.querySelector('.row.now');if(nowEl){nowEl.scrollIntoView({block:'center',behavior:'smooth'});scrolled=true;}}
+  }
+  window.refresh=render;
+  loadState();
+  parse();
+  render();
+  setInterval(render,30000);
+  document.getElementById('resetday').addEventListener('click',function(){
+    if(confirm('Reset the day? This clears all completed items.')){completed={};saveState();scrolled=false;render();}
+  });
 </script>
 </body>
 </html>
