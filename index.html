@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0f6e56" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="My Day" />
+<title>My Day — Monday, June 15</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css" />
+<style>
+  :root{
+    --bg:#f5f4ef; --card:#ffffff; --ink:#23231f; --muted:#6b6a64; --line:rgba(0,0,0,.08);
+    --health:#0f6e56; --health-bg:#e1f5ee;
+    --logi:#185fa5;  --logi-bg:#e6f1fb;
+    --work:#854f0b;  --work-bg:#faeeda;
+    --rest:#5f5e5a;  --rest-bg:#f1efe8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1a1a18; --card:#262522; --ink:#ededea; --muted:#a3a29c; --line:rgba(255,255,255,.10);
+      --health:#5dcaa5; --health-bg:#0f3e33;
+      --logi:#85b7eb;  --logi-bg:#0c365a;
+      --work:#efb05a;  --work-bg:#4a3208;
+      --rest:#b4b2a9;  --rest-bg:#33322d;
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 32px)}
+  .wrap{max-width:560px;margin:0 auto;padding:20px 16px}
+  header{margin:8px 4px 18px}
+  .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin:0}
+  h1{font-size:26px;font-weight:600;margin:4px 0 2px}
+  .sub{font-size:14px;color:var(--muted);margin:0}
+  .clock{font-size:13px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px}
+  .leg{display:flex;flex-wrap:wrap;gap:12px;margin:14px 4px 6px;font-size:12.5px;color:var(--muted)}
+  .leg span{display:flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .row{display:grid;grid-template-columns:58px 1fr;gap:10px;margin:8px 0}
+  .tm{font-size:12px;color:var(--muted);text-align:right;padding-top:13px;line-height:1.25}
+  .blk{border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;
+    border:1px solid transparent;transition:transform .15s ease}
+  .blk i{font-size:22px;flex:none}
+  .bt{font-size:15.5px;font-weight:600;margin:0}
+  .bs{font-size:12.5px;margin:2px 0 0;opacity:.82}
+  .health .blk{background:var(--health-bg);color:var(--health)}
+  .logi   .blk{background:var(--logi-bg);color:var(--logi)}
+  .work   .blk{background:var(--work-bg);color:var(--work)}
+  .rest   .blk{background:var(--rest-bg);color:var(--rest)}
+  .now .blk{border-color:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 18%,transparent)}
+  .now .tm{font-weight:700;color:var(--ink)}
+  .pastdim{opacity:.45}
+  .nowtag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    margin-left:auto;padding:3px 8px;border-radius:999px;background:currentColor;flex:none}
+  .nowtag b{color:var(--card)}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Your day</p>
+    <h1>Monday, June 15</h1>
+    <p class="sub">Stay on track · stay healthy</p>
+    <p class="clock"><i class="ti ti-clock"></i><span id="clock">—</span></p>
+  </header>
+
+  <div class="leg">
+    <span><i class="dot" style="background:var(--health)"></i>Health</span>
+    <span><i class="dot" style="background:var(--logi)"></i>Logistics</span>
+    <span><i class="dot" style="background:var(--work)"></i>Deep work</span>
+    <span><i class="dot" style="background:var(--rest)"></i>Personal</span>
+  </div>
+
+  <div id="agenda">
+    <div class="row health" data-start="06:30" data-end="06:45"><div class="tm">6:30<br>AM</div><div class="blk"><i class="ti ti-sun"></i><div><p class="bt">Wake up &amp; hydrate</p><p class="bs">Big glass of water first</p></div></div></div>
+    <div class="row health" data-start="06:45" data-end="07:15"><div class="tm">6:45<br>AM</div><div class="blk"><i class="ti ti-egg"></i><div><p class="bt">Breakfast with Emma</p><p class="bs">Protein + fruit · 30 min</p></div></div></div>
+    <div class="row health" data-start="07:15" data-end="08:30"><div class="tm">7:15<br>AM</div><div class="blk"><i class="ti ti-barbell"></i><div><p class="bt">Gym workout</p><p class="bs">Non-negotiable · 60 min</p></div></div></div>
+    <div class="row rest" data-start="08:30" data-end="09:00"><div class="tm">8:30<br>AM</div><div class="blk"><i class="ti ti-shirt"></i><div><p class="bt">Shower &amp; get ready</p><p class="bs">30 min</p></div></div></div>
+    <div class="row logi" data-start="09:00" data-end="09:30"><div class="tm">9:00<br>AM</div><div class="blk"><i class="ti ti-car"></i><div><p class="bt">Drive Mesquite → Dallas</p><p class="bs">Grace Ln → Rockbrook Dr · ~30 min</p></div></div></div>
+    <div class="row logi" data-start="09:30" data-end="09:45"><div class="tm">9:30<br>AM</div><div class="blk"><i class="ti ti-user-heart"></i><div><p class="bt">Drop off Emma</p><p class="bs">Rockbrook Dr</p></div></div></div>
+    <div class="row logi" data-start="09:45" data-end="11:00"><div class="tm">9:45<br>AM</div><div class="blk"><i class="ti ti-building-bank"></i><div><p class="bt">Bank — open Nova Lobo account</p><p class="bs">Bring EIN + ID · ~1 hr</p></div></div></div>
+    <div class="row logi" data-start="11:00" data-end="12:00"><div class="tm">11:00<br>AM</div><div class="blk"><i class="ti ti-building-warehouse"></i><div><p class="bt">Storage units for Aunt Mary</p><p class="bs">Compare size + price · ~45 min</p></div></div></div>
+    <div class="row health" data-start="12:00" data-end="13:00"><div class="tm">12:00<br>PM</div><div class="blk"><i class="ti ti-salad"></i><div><p class="bt">Lunch</p><p class="bs">Something real · 45 min</p></div></div></div>
+    <div class="row work" data-start="13:00" data-end="15:00"><div class="tm">1:00<br>PM</div><div class="blk"><i class="ti ti-device-tv"></i><div><p class="bt">Players TV site — focus block 1</p><p class="bs">Phone on silent · 2 hr</p></div></div></div>
+    <div class="row health" data-start="15:00" data-end="15:15"><div class="tm">3:00<br>PM</div><div class="blk"><i class="ti ti-walk"></i><div><p class="bt">Movement break</p><p class="bs">Walk + water · 15 min</p></div></div></div>
+    <div class="row work" data-start="15:15" data-end="17:00"><div class="tm">3:15<br>PM</div><div class="blk"><i class="ti ti-device-tv"></i><div><p class="bt">Players TV site — focus block 2</p><p class="bs">~1 hr 45 min</p></div></div></div>
+    <div class="row health" data-start="17:00" data-end="17:15"><div class="tm">5:00<br>PM</div><div class="blk"><i class="ti ti-apple"></i><div><p class="bt">Snack &amp; stretch</p><p class="bs">15 min</p></div></div></div>
+    <div class="row work" data-start="17:15" data-end="18:30"><div class="tm">5:15<br>PM</div><div class="blk"><i class="ti ti-device-tv"></i><div><p class="bt">Players TV site — wrap-up</p><p class="bs">Note tomorrow's first task · 75 min</p></div></div></div>
+    <div class="row health" data-start="18:45" data-end="19:30"><div class="tm">6:45<br>PM</div><div class="blk"><i class="ti ti-tools-kitchen-2"></i><div><p class="bt">Dinner with Emma</p><p class="bs">Healthy + unwind · 45 min</p></div></div></div>
+    <div class="row rest" data-start="19:30" data-end="21:30"><div class="tm">7:30<br>PM</div><div class="blk"><i class="ti ti-heart"></i><div><p class="bt">Free time with Emma</p><p class="bs">Relax, no work</p></div></div></div>
+    <div class="row health" data-start="21:30" data-end="22:30"><div class="tm">9:30<br>PM</div><div class="blk"><i class="ti ti-moon"></i><div><p class="bt">Wind down — screens off</p><p class="bs">Dim lights, prep for sleep</p></div></div></div>
+    <div class="row rest" data-start="22:30" data-end="23:59"><div class="tm">10:30<br>PM</div><div class="blk"><i class="ti ti-bed"></i><div><p class="bt">Sleep</p><p class="bs">Aim for 8 hours</p></div></div></div>
+  </div>
+
+  <footer>Built for you · tap &amp; hold the share button to “Add to Home Screen”</footer>
+</div>
+
+<script>
+  function mins(s){var p=s.split(":");return (+p[0])*60+(+p[1]);}
+  function refresh(){
+    var now=new Date();
+    var nm=now.getHours()*60+now.getMinutes();
+    document.getElementById('clock').textContent=now.toLocaleString([], {weekday:'short', hour:'numeric', minute:'2-digit'});
+    var rows=document.querySelectorAll('#agenda .row');
+    rows.forEach(function(r){
+      r.classList.remove('now','pastdim');
+      var s=mins(r.dataset.start), e=mins(r.dataset.end);
+      var tag=r.querySelector('.nowtag'); if(tag) tag.remove();
+      if(nm>=s && nm<e){
+        r.classList.add('now');
+        var b=r.querySelector('.blk');
+        var t=document.createElement('span'); t.className='nowtag'; t.innerHTML='<b>NOW</b>';
+        b.appendChild(t);
+        r.scrollIntoView({block:'center',behavior:'smooth'});
+      } else if(nm>=e){
+        r.classList.add('pastdim');
+      }
+    });
+  }
+  refresh();
+  setInterval(refresh,30000);
+</script>
+</body>
+</html>
